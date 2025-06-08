@@ -79,7 +79,7 @@ export default function Homepage() {
         <img
           src={SkinmuseImage}
           alt="SkinMuse Illustration"
-          className="h-[400px] w-auto object-contain -ml-12"
+          className="h-[400px] w-auto mr-12 "
         />
       </main>
     </div>
