@@ -72,6 +72,9 @@ export default function Homepage() {
             </p>
 
             <div className="w-full h-[1px] bg-gray-500 opacity-70"></div>
+            <button className="mt-9 px-6 py-2 rounded-full border-2 border-[#A55166] text-[#A55166] hover:bg-[#A55166] hover:text-white transition duration-300 font-inter font-bold">
+              Sign Up Now!
+            </button>
           </div>
         </div>
 
