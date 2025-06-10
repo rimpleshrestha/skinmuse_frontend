@@ -1,5 +1,5 @@
 import React from "react";
-import SkinmuseLogo from "../assets/images/skinmuselogo.svg";
+import SkinmuseLogo from "../assets/images/skinMuseLogo.png";
 import SkinmuseImage from "../assets/images/skinmuse_image.png";
 import StarIcon from "../assets/images/star_skinmuse.svg";
 import StarIcon1 from "../assets/images/star1_skinmuse.svg"; // ✅ New star image
