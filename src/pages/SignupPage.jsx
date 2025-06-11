@@ -1,6 +1,8 @@
 import axios from "axios";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
+import SkinmuseLogo2 from "../assets/images/skinmuselogo2.png";
 
 const SignupPage = () => {
   const [email, setEmail] = useState("");
@@ -10,16 +12,23 @@ const SignupPage = () => {
     e.preventDefault();
     console.log("Email:", email);
     console.log("Password:", password);
-    const respoonse = await axios.post("http://localhost:3000/api/login", {
+    const response = await axios.post("http://localhost:3000/api/login", {
       email,
       password,
     });
-    console.log("response", await respoonse.data);
-    toast.success("fuck yueahh");
+    console.log("response", response.data);
+    toast.success("Logged in successfully!");
   };
 
   return (
-    <div className="w-screen h-screen bg-gradient-to-b from-[#fad1e3] to-[#ff65aa]/10 flex items-center justify-center font-kaisei">
+    <div className="w-screen h-screen bg-gradient-to-b from-[#fad1e3] to-[#ff65aa]/10 flex flex-col items-center justify-center font-kaisei">
+      {/* Logo Image above form - bigger size */}
+      <img
+        src={SkinmuseLogo2}
+        alt="Skinmuse Logo"
+        className="mb-8 w-72 h-auto"
+      />
+
       <form
         onSubmit={onSubmit}
         className="w-[600px] p-8 rounded-2xl shadow-lg bg-opacity-25 backdrop-blur-md border bg-[#A55166]"
@@ -61,6 +70,20 @@ const SignupPage = () => {
         >
           Log In
         </button>
+
+        {/* Centered "Don't have an account?" line */}
+        <p
+          className="text-black font-bold mt-4 text-center w-full"
+          style={{ fontFamily: "'Julius Sans One', sans-serif" }}
+        >
+          Don't have an account?{" "}
+          <Link
+            to="/register"
+            className="text-black font-bold no-underline hover:no-underline"
+          >
+            Sign Up
+          </Link>
+        </p>
       </form>
     </div>
   );
