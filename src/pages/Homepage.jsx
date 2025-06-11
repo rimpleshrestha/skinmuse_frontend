@@ -1,10 +1,13 @@
 import React from "react";
+import { useNavigate } from "react-router-dom"; // ⬅️ Added for navigation
 import SkinmuseLogo from "../assets/images/skinMuseLogo.png";
 import SkinmuseImage from "../assets/images/skinmuse_image.png";
 import StarIcon from "../assets/images/star_skinmuse.svg";
-import StarIcon1 from "../assets/images/star1_skinmuse.svg"; // ✅ New star image
+import StarIcon1 from "../assets/images/star1_skinmuse.svg";
 
 export default function Homepage() {
+  const navigate = useNavigate(); // ⬅️ Initialize navigate function
+
   return (
     <div className="w-screen h-screen bg-[#FFEDF5] font-kaisei overflow-x-hidden">
       <header
@@ -33,7 +36,6 @@ export default function Homepage() {
       <main className="flex justify-between items-center h-[calc(100vh-5rem)] px-12">
         {/* Left side with star and text */}
         <div className="flex flex-col items-start text-left max-w-xl relative">
-          {/* ⭐ Star Image above heading */}
           <img
             src={StarIcon}
             alt="Star Icon"
@@ -54,7 +56,6 @@ export default function Homepage() {
           <div className="w-full flex flex-col items-center relative">
             <div className="w-full h-[1px] bg-gray-500 opacity-70 mt-12"></div>
 
-            {/* ⭐ New star above "500 Happy Users", aligned right */}
             <img
               src={StarIcon1}
               alt="Star Icon"
@@ -72,7 +73,12 @@ export default function Homepage() {
             </p>
 
             <div className="w-full h-[1px] bg-gray-500 opacity-70"></div>
-            <button className="mt-9 px-6 py-2 rounded-full border-2 border-[#A55166] text-[#A55166] hover:bg-[#A55166] hover:text-white transition duration-300 font-inter font-bold">
+
+            {/* ⬇️ Sign Up Button with navigation */}
+            <button
+              onClick={() => navigate("/register")}
+              className="mt-9 px-6 py-2 rounded-full border-2 border-[#A55166] text-[#A55166] hover:bg-[#A55166] hover:text-white transition duration-300 font-inter font-bold"
+            >
               Sign Up Now!
             </button>
           </div>
@@ -82,7 +88,7 @@ export default function Homepage() {
         <img
           src={SkinmuseImage}
           alt="SkinMuse Illustration"
-          className="h-[400px] w-auto mr-12 "
+          className="h-[400px] w-auto mr-12"
         />
       </main>
     </div>
