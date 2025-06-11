@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import SkinmuseLogo2 from "../assets/images/skinmuselogo2.png";
 
 const RegisterPage = () => {
   const [email, setEmail] = useState("");
@@ -12,13 +13,18 @@ const RegisterPage = () => {
       alert("Passwords do not match");
       return;
     }
-    console.log("Email:", email);
-    console.log("Password:", password);
-    // Send register request here
+    // Add registration logic here
   };
 
   return (
-    <div className="w-screen h-screen bg-gradient-to-b from-[#fad1e3] to-[#ff65aa]/10 flex items-center justify-center font-kaisei">
+    <div className="w-screen h-screen bg-gradient-to-b from-[#fad1e3] to-[#ff65aa]/10 flex flex-col items-center justify-center font-kaisei">
+      {/* Bigger logo above form */}
+      <img
+        src={SkinmuseLogo2}
+        alt="Skinmuse Logo"
+        className="mb-8 w-72 h-auto"
+      />
+
       <form
         onSubmit={onSubmit}
         className="w-[600px] p-8 rounded-2xl shadow-lg bg-opacity-25 backdrop-blur-md border bg-[#A55166]"
@@ -29,7 +35,7 @@ const RegisterPage = () => {
           </label>
           <input
             type="email"
-            placeholder="you@example.com"
+            placeholder="toffee@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full p-3 shadow-md rounded-xl bg-white focus:outline-none"
@@ -65,9 +71,15 @@ const RegisterPage = () => {
         >
           Register
         </button>
-        <p className="text-white text-center mt-4 font-inter">
+        <p
+          className="text-black font-bold text-center mt-4"
+          style={{ fontFamily: "'Julius Sans One', sans-serif" }}
+        >
           Already have an account?{" "}
-          <Link to="/signup" className="underline hover:text-[#ffd5eb]">
+          <Link
+            to="/signup"
+            className="text-black font-bold no-underline hover:no-underline"
+          >
             Sign in
           </Link>
         </p>
