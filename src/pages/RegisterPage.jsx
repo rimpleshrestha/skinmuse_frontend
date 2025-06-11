@@ -1,17 +1,31 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import SkinmuseLogo2 from "../assets/images/skinmuselogo2.png";
+import toast from "react-hot-toast";
+import axios from "axios";
 
 const RegisterPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
-  const onSubmit = (e) => {
+  const navigate = useNavigate();
+  const onSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
+    }
+    const response = await axios.post("http://localhost:3000/api/signup", {
+      email,
+      password,
+      confirm_password: confirmPassword,
+    });
+    if ([200, 201].includes(response.status)) {
+      toast.success("Registerd  in successfully!");
+      navigate("/dashboard");
+      sessionStorage.setItem("access-token", response.data.accessToken);
+    } else {
+      toast.success("Registerd  in Failed!");
     }
     // Add registration logic here
   };

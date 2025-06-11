@@ -1,13 +1,13 @@
 import axios from "axios";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import SkinmuseLogo2 from "../assets/images/skinmuselogo2.png";
 
 const SignupPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const navigate = useNavigate();
   const onSubmit = async (e) => {
     e.preventDefault();
     console.log("Email:", email);
@@ -16,8 +16,13 @@ const SignupPage = () => {
       email,
       password,
     });
-    console.log("response", response.data);
-    toast.success("Logged in successfully!");
+    if ([200, 201].includes(response.status)) {
+      toast.success("Logged in successfully!");
+      navigate("/dashboard");
+      sessionStorage.setItem("access-token", response.data.accessToken);
+    } else {
+      toast.success("Logged in Failed!");
+    }
   };
 
   return (
