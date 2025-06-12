@@ -9,31 +9,8 @@ export default function Homepage() {
   const navigate = useNavigate(); // ⬅️ Initialize navigate function
 
   return (
-    <div className="w-screen h-screen bg-[#FFEDF5] font-kaisei overflow-x-hidden">
-      <header
-        className="bg-white shadow flex justify-between items-center px-12"
-        style={{ height: "5rem", overflow: "hidden" }}
-      >
-        <img
-          src={SkinmuseLogo}
-          alt="SkinMuse Logo"
-          className="h-20 object-contain"
-        />
-
-        <nav className="flex gap-20 font-inter font-bold text-[#A55166]">
-          <a href="#login" className="hover:text-[#E17C96]">
-            Login
-          </a>
-          <a href="#home" className="hover:text-[#E17C96]">
-            Home
-          </a>
-          <a href="#about" className="hover:text-[#E17C96]">
-            About Us
-          </a>
-        </nav>
-      </header>
-
-      <main className="flex justify-between items-center h-[calc(100vh-5rem)] px-12">
+    <div className=" bg-[#FFEDF5] h-full w-full flex justify-center items-center px-10 font-kaisei overflow-x-hidden overflow-clip">
+      <main className="flex justify-between gap-[30px] h-full w-full items-center  ">
         {/* Left side with star and text */}
         <div className="flex flex-col items-start text-left max-w-xl relative">
           <img

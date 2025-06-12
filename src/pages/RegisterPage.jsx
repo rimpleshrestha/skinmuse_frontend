@@ -31,7 +31,7 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="w-screen h-screen bg-gradient-to-b from-[#fad1e3] to-[#ff65aa]/10 flex flex-col items-center justify-center font-kaisei">
+    <div className=" bg-gradient-to-b h-full w-full from-[#fad1e3] to-[#ff65aa]/10 flex flex-col items-center justify-center font-kaisei">
       {/* Bigger logo above form */}
       <img
         src={SkinmuseLogo2}

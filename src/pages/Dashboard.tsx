@@ -12,7 +12,11 @@ const Dashboard = () => {
   }, [token, navigate]);
 
   if (!token) return <></>;
-  return <>dash</>;
+  return (
+    <div className="bg-[#f9f9f9] p-12 min-h-[100vh]">
+      <h2 className="text-xl font-semibold">Hello To Dashboard 👋</h2>
+    </div>
+  );
 };
 
 export default Dashboard;
