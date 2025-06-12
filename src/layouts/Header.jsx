@@ -15,7 +15,7 @@ const Header = () => {
   const logout = () => {
     sessionStorage.removeItem("access-token");
     setToken(null);
-    navigate("/register");
+    navigate("/signup");
   };
   return (
     <header className="bg-white shadow flex justify-between items-center px-12">
