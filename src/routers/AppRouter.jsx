@@ -1,16 +1,10 @@
-import {
-  Routes,
-  Route,
-  NavLink,
-  useNavigate,
-  useLocation,
-  Navigate,
-} from "react-router-dom";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Homepage from "../pages/Homepage";
 import SignupPage from "../pages/SignupPage";
 import RegisterPage from "../pages/RegisterPage";
 import Dashboard from "../pages/Dashboard";
+import Quiz from "../pages/Quiz"; // ✅ Import Quiz
 import { Toaster } from "react-hot-toast";
 import MainLayout from "../layouts/MainLayout";
 
@@ -23,7 +17,7 @@ const AppRouter = () => {
   useEffect(() => {
     const newToken = sessionStorage.getItem("access-token");
     setToken(newToken);
-  }, [location]); // triggers when route changes — especially after login
+  }, [location]);
 
   const logout = () => {
     sessionStorage.removeItem("access-token");
@@ -39,6 +33,7 @@ const AppRouter = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/quiz" element={<Quiz />} /> {/* ✅ Add this */}
         </Route>
       </Routes>
       <Toaster />
