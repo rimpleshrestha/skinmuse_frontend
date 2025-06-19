@@ -4,7 +4,9 @@ import Homepage from "../pages/Homepage";
 import SignupPage from "../pages/SignupPage";
 import RegisterPage from "../pages/RegisterPage";
 import Dashboard from "../pages/Dashboard";
-import Quiz from "../pages/Quiz"; // ✅ Import Quiz
+import Quiz from "../pages/Quiz";
+import CreatePostPage from "../pages/CreatePostPage";
+import ProductPage from "../pages/Productpage"; // <-- Import ProductPage here
 import { Toaster } from "react-hot-toast";
 import MainLayout from "../layouts/MainLayout";
 
@@ -30,10 +32,13 @@ const AppRouter = () => {
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<Homepage />} />
+          <Route path="/create-post" element={<CreatePostPage />} />
+          <Route path="/products" element={<ProductPage />} />{" "}
+          {/* <-- Added here */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          <Route path="/quiz" element={<Quiz />} /> {/* ✅ Add this */}
+          <Route path="/quiz" element={<Quiz />} />
         </Route>
       </Routes>
       <Toaster />
