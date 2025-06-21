@@ -14,6 +14,8 @@ const Header = () => {
 
   const logout = () => {
     sessionStorage.removeItem("access-token");
+    sessionStorage.removeItem("email");
+    sessionStorage.removeItem("role");
     setToken(null);
     navigate("/signup");
   };
@@ -26,13 +28,41 @@ const Header = () => {
           className="h-20 object-contain"
         />
       </NavLink>
-      <nav className="flex gap-20 font-inter items-center font-bold text-[#A55166]">
-        <NavLink to="#">About Us</NavLink>
+      <nav className="flex gap-3 font-inter items-center font-bold text-[#A55166]">
+        <button className="text-nowrap" to="#">
+          About Us
+        </button>
+        {["admin"].includes(sessionStorage.getItem("role")) && (
+          <button
+            className="text-nowrap"
+            onClick={() => navigate("/create-post")}
+          >
+            Create Post
+          </button>
+        )}
         {token ? (
-          <button onClick={logout}>Logout</button>
+          <>
+            <button
+              className="text-nowrap"
+              onClick={() => navigate("/products")}
+            >
+              Products
+            </button>
+            <button
+              className="text-nowrap"
+              onClick={() => navigate("/profile")}
+            >
+              Profile
+            </button>
+            <button className="text-nowrap" onClick={logout}>
+              Logout
+            </button>
+          </>
         ) : (
           <>
-            <NavLink to="/signup">Login</NavLink>
+            <button className="text-nowrap" onClick={() => navigate("/signup")}>
+              Login
+            </button>
           </>
         )}
       </nav>

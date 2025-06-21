@@ -1,8 +1,10 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
+import { axiosInstance } from "../../api/axiosinstance";
 
 const ProfilePage = () => {
   const [name, setName] = useState("");
-  const [email] = useState("toffee@example.com"); // Replace with real logic
+
   const [profilePic, setProfilePic] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [newPassword, setNewPassword] = useState("");
@@ -12,17 +14,35 @@ const ProfilePage = () => {
     setProfilePic(URL.createObjectURL(e.target.files[0]));
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    console.log({ name, email, profilePic });
+    console.log({ name });
+    const response = await axiosInstance.put("/update-details", { name });
+    console.log(response);
+    if ([200, 201].includes(response.status)) {
+      return toast.success("Profile updated successfully!");
+    } else {
+      return toast.error("Profile update failed!");
+    }
   };
 
-  const handleResetPassword = () => {
+  const handleResetPassword = async () => {
     if (newPassword !== confirmPassword) {
-      alert("Passwords do not match.");
+      toast.error("Passwords do not match.");
       return;
     }
-    console.log("New password set:", newPassword);
+    console.log({ name });
+    const response = await axiosInstance.put("/change-password", {
+      email: sessionStorage.getItem("email"),
+      new_password: newPassword,
+      confirm_password: confirmPassword,
+    });
+    console.log(response);
+    if ([200, 201].includes(response.status)) {
+      toast.success("Password updated successfully!");
+    } else {
+      toast.error("Password update failed!");
+    }
     setShowModal(false);
     setNewPassword("");
     setConfirmPassword("");
@@ -43,7 +63,7 @@ const ProfilePage = () => {
         className="w-[600px] p-8 rounded-2xl shadow-lg bg-opacity-25 backdrop-blur-md border bg-[#A55166]"
       >
         {/* Profile Picture */}
-        <div className="mb-6 flex flex-col items-center">
+        {/* <div className="mb-6 flex flex-col items-center">
           <div className="w-32 h-32 rounded-full bg-white shadow-md mb-3 overflow-hidden">
             {profilePic ? (
               <img
@@ -63,7 +83,7 @@ const ProfilePage = () => {
             onChange={handleProfilePicChange}
             className="text-sm text-white font-inter"
           />
-        </div>
+        </div> */}
 
         {/* Name */}
         <div className="mb-4">
@@ -86,7 +106,7 @@ const ProfilePage = () => {
           </label>
           <input
             type="text"
-            value={email}
+            value={sessionStorage.getItem("email")}
             readOnly
             className="w-full p-3 shadow-md rounded-xl bg-gray-100 text-gray-600 cursor-not-allowed"
           />

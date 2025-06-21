@@ -21,11 +21,10 @@ const RegisterPage = () => {
       confirm_password: confirmPassword,
     });
     if ([200, 201].includes(response.status)) {
-      toast.success("Registerd  in successfully!");
-      navigate("/dashboard");
-      sessionStorage.setItem("access-token", response.data.accessToken);
+      toast.success("Registered  in successfully!");
+      navigate("/signup");
     } else {
-      toast.success("Registerd  in Failed!");
+      toast.success("Registered  in Failed!");
     }
     // Add registration logic here
   };
@@ -52,7 +51,7 @@ const RegisterPage = () => {
             placeholder="toffee@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 shadow-md rounded-xl bg-white focus:outline-none"
+            className="w-full p-3 shadow-md rounded-xl text-black bg-white focus:outline-none"
           />
         </div>
         <div className="mb-4">
@@ -64,7 +63,7 @@ const RegisterPage = () => {
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 shadow-md rounded-xl bg-white focus:outline-none"
+            className="w-full p-3 shadow-md rounded-xl text-black bg-white focus:outline-none"
           />
         </div>
         <div className="mb-6">
@@ -76,7 +75,7 @@ const RegisterPage = () => {
             placeholder="••••••••"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full p-3 shadow-md rounded-xl bg-white focus:outline-none"
+            className="w-full p-3 shadow-md text-black rounded-xl bg-white focus:outline-none"
           />
         </div>
         <button

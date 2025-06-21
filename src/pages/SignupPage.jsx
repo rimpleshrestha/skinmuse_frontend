@@ -22,8 +22,11 @@ const LoginPage = () => {
 
       if ([200, 201].includes(response.status)) {
         toast.success("Logged in successfully!");
-        navigate("/dashboard");
+
         sessionStorage.setItem("access-token", response.data.accessToken);
+        sessionStorage.setItem("email", response.data.email);
+        sessionStorage.setItem("role", response.data.userRole);
+        navigate("/dashboard");
       } else {
         toast.error("Login Failed!");
       }
@@ -57,7 +60,7 @@ const LoginPage = () => {
             placeholder="toffee@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 shadow-md rounded-xl bg-white focus:outline-none"
+            className="w-full p-3 shadow-md rounded-xl text-black bg-white focus:outline-none"
             required
           />
         </div>
@@ -72,7 +75,7 @@ const LoginPage = () => {
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 shadow-md rounded-xl bg-white focus:outline-none"
+            className="w-full p-3 shadow-md rounded-xl bg-white text-black focus:outline-none"
             required
           />
         </div>

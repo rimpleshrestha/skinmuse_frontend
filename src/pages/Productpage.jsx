@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { axiosInstance } from "../../api/axiosinstance";
+import { useNavigate } from "react-router-dom";
 
 const ProductPage = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -7,14 +9,17 @@ const ProductPage = () => {
     { id: 2, author: "User2", text: "Thanks for sharing." },
   ]);
   const [newComment, setNewComment] = useState("");
-
+  const [productData, setProductData] = useState([]);
   // Placeholder product data
-  const products = Array(6).fill({
-    title: "",
-    description: "",
-    imageUrl: "https://via.placeholder.com/600x400",
-  });
-
+  useEffect(() => {
+    (async () => {
+      const response = await axiosInstance.get("/post");
+      if ([200, 201].includes(response.status)) {
+        setProductData(response?.data?.posts);
+      }
+    })();
+  }, []);
+  console.log(productData);
   const openModal = (product) => {
     setSelectedProduct(product);
     // Reset new comment input
@@ -34,25 +39,35 @@ const ProductPage = () => {
     ]);
     setNewComment("");
   };
-
+  const deletePost = async (id) => {
+    try {
+      const response = await axiosInstance.delete(`/post/${id}`);
+      if (response.status === 200) {
+        setProductData(productData.filter((product) => product._id !== id));
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+    }
+  };
+  const navigate = useNavigate();
   return (
     <div className="bg-gradient-to-b min-h-screen w-full from-[#fad1e3] to-[#ff65aa]/10 flex flex-col items-center font-kaisei py-10">
       <h1
         className="text-4xl font-bold text-[#A55166] mb-10"
         style={{ fontFamily: "'Julius Sans One', sans-serif" }}
       >
-        For Oily Skin
+        {/* For Oily Skin */} Products
       </h1>
 
       <div className="w-[90%] max-w-7xl grid grid-cols-3 gap-8">
-        {products.map((product, idx) => (
+        {productData.map((product, idx) => (
           <div
             key={idx}
             onClick={() => openModal(product)}
-            className="bg-white rounded-2xl shadow-lg p-4 flex flex-col cursor-pointer hover:shadow-xl transition"
+            className="bg-white rounded-2xl relative shadow-lg p-4 flex flex-col cursor-pointer hover:shadow-xl transition"
           >
             <img
-              src={product.imageUrl}
+              src={product.image}
               alt=""
               className="rounded-xl object-cover w-full h-44 mb-4"
             />
@@ -64,12 +79,23 @@ const ProductPage = () => {
               {product.title || "Title"}
             </div>
             <div
-              className={`min-h-[3rem] text-center font-inter text-sm ${
+              className={`min-h-[3rem] line-clamp-3 text-center font-inter text-sm ${
                 product.description ? "text-[#A55166]/80" : "text-gray-400"
               }`}
             >
               {product.description || "Description"}
             </div>
+            {["admin"].includes(sessionStorage.getItem("role")) && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deletePost(product._id);
+                }}
+                className="absolute top-6  hover:border-none hover:outline-none left-6 text-gray-600 text-[12px] bg-red-500 hover:bg-red-600 hover:text-white transiion-all font-semibold "
+              >
+                Delete Post
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -85,19 +111,30 @@ const ProductPage = () => {
             <div className="bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[90vh] flex flex-col md:flex-row overflow-hidden relative">
               <button
                 onClick={closeModal}
-                className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 text-3xl font-bold z-10"
+                className="absolute top-4 hover:border-none hover:outline-none right-4 text-gray-600 hover:text-gray-900 text-3xl font-bold z-10"
                 aria-label="Close modal"
               >
                 &times;
               </button>
 
               {/* Image Section */}
-              <div className="md:w-1/2 w-full flex items-center justify-center bg-[#fad1e3] p-4">
+              <div className="md:w-1/2 w-full relative flex items-center justify-center bg-[#fad1e3] p-4">
                 <img
-                  src={selectedProduct.imageUrl}
+                  src={selectedProduct.image}
                   alt=""
                   className="rounded-xl object-contain max-h-[80vh] w-full"
                 />
+                {["admin"].includes(sessionStorage.getItem("role")) && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/create-post/${selectedProduct._id}`);
+                    }}
+                    className="absolute top-6  hover:border-none hover:outline-none left-6 text-gray-600 text-[12px] bg-yellow-500 hover:bg-yellow-600 hover:text-white transiion-all font-semibold "
+                  >
+                    Edit Post
+                  </button>
+                )}
               </div>
 
               {/* Comments Section */}

@@ -33,14 +33,15 @@ const AppRouter = () => {
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<Homepage />} />
-          <Route path="/create-post" element={<CreatePostPage />} />
+          <Route path="/create-post/" element={<CreatePostPage />} />
+          <Route path="/create-post/:id" element={<CreatePostPage />} />
           <Route path="/products" element={<ProductPage />} />{" "}
           {/* <-- Added here */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/quiz" element={<Quiz />} />
-          <Route path ="/profile" element ={<ProfilePage/>} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Routes>
       <Toaster />

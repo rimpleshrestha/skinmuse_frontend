@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { axiosInstance } from "../../api/axiosinstance";
+import toast from "react-hot-toast";
+import { useParams, useSearchParams } from "react-router-dom";
 
 const CreatePostPage = () => {
   const [title, setTitle] = useState("");
@@ -6,10 +9,64 @@ const CreatePostPage = () => {
   const [skinType, setSkinType] = useState("");
   const [imageUrl, setImageUrl] = useState("");
 
-  const handleSubmit = (e) => {
+  const params = useParams();
+  console.log(params);
+  useEffect(() => {
+    if (params.id) {
+      console.log(params.id);
+      axiosInstance
+        .get(`/post/${params.id}`)
+        .then((response) => {
+          if (response.status === 200) {
+            setTitle(response.data.post.title);
+            setDescription(response.data.post.description);
+            setSkinType(response.data.post.skin_type);
+            setImageUrl(response.data.post.image);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching post:", error);
+        });
+    }
+  }, [params.id]);
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ title, description, skinType, imageUrl });
-    // Add form submit logic here
+    if (params.id) {
+      const response = await axiosInstance.put(`/post/${params.id}`, {
+        title,
+        description,
+        skin_type: skinType,
+        image: imageUrl,
+      });
+      if (response.status === 404) {
+        toast.error("Post not found! or not authorized.");
+      }
+      if (response.status === 200) {
+        toast.success("Post updated successfully!");
+        setTitle("");
+        setDescription("");
+        setSkinType("");
+        setImageUrl("");
+      } else {
+        toast.error("Post update failed!");
+      }
+      return;
+    }
+    const response = await axiosInstance.post("/post", {
+      title,
+      description,
+      skin_type: skinType,
+      image: imageUrl,
+    });
+    if (response.status === 201) {
+      toast.success("Post created successfully!");
+      setTitle("");
+      setDescription("");
+      setSkinType("");
+      setImageUrl("");
+    } else {
+      toast.error("Post creation failed!");
+    }
   };
 
   return (
