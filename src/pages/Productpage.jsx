@@ -4,13 +4,16 @@ import { useNavigate } from "react-router-dom";
 
 const ProductPage = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [comments, setComments] = useState([
-    { id: 1, author: "User1", text: "Nice post!" },
-    { id: 2, author: "User2", text: "Thanks for sharing." },
-  ]);
+  const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingText, setEditingText] = useState("");
   const [productData, setProductData] = useState([]);
-  // Placeholder product data
+  const navigate = useNavigate();
+
+  // Assuming logged-in user id is stored in sessionStorage
+  const loggedInUserId = sessionStorage.getItem("userId");
+
   useEffect(() => {
     (async () => {
       const response = await axiosInstance.get("/post");
@@ -19,44 +22,144 @@ const ProductPage = () => {
       }
     })();
   }, []);
-  console.log(productData);
-  const openModal = (product) => {
+
+  const openModal = async (product) => {
     setSelectedProduct(product);
-    // Reset new comment input
     setNewComment("");
-    // Optionally, load comments for this product here
+    setEditingCommentId(null);
+    setEditingText("");
+
+    try {
+      const response = await axiosInstance.get(
+        `/comments/post/${product._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem("access-token")}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        console.log("Comments from backend:", response.data);
+        setComments(
+          response.data.map((c) => ({
+            id: c._id,
+            author:
+              c.user?._id === loggedInUserId
+                ? "You"
+                : c.user?.name || "Unknown",
+            userId: c.user?._id, // store userId for permission checks
+            text: c.comment,
+          }))
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching comments for product:", error);
+      setComments([]);
+    }
   };
 
   const closeModal = () => {
     setSelectedProduct(null);
+    setEditingCommentId(null);
+    setEditingText("");
+    setComments([]);
   };
 
-  const handleAddComment = () => {
+  const handleAddComment = async () => {
     if (!newComment.trim()) return;
-    setComments((prev) => [
-      ...prev,
-      { id: Date.now(), author: "You", text: newComment.trim() },
-    ]);
-    setNewComment("");
-  };
-  const deletePost = async (id) => {
+
     try {
-      const response = await axiosInstance.delete(`/post/${id}`);
-      if (response.status === 200) {
-        setProductData(productData.filter((product) => product._id !== id));
+      const response = await axiosInstance.post(
+        `/comments/${selectedProduct._id}`,
+        { comment: newComment.trim() },
+        {
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem("access-token")}`,
+          },
+        }
+      );
+
+      if (response.status === 201) {
+        const savedComment = response.data;
+        setComments((prev) => [
+          ...prev,
+          {
+            id: savedComment._id,
+            author: "You", // The new comment belongs to logged-in user
+            userId: loggedInUserId,
+            text: savedComment.comment,
+          },
+        ]);
+        setNewComment("");
       }
     } catch (error) {
-      console.error("Error deleting product:", error);
+      console.error("Error adding comment:", error);
     }
   };
-  const navigate = useNavigate();
+
+  const deleteComment = async (id) => {
+    try {
+      const response = await axiosInstance.delete(`/comments/${id}`, {
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem("access-token")}`,
+        },
+      });
+
+      if (response.status === 200) {
+        setComments((prev) => prev.filter((comment) => comment.id !== id));
+      }
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+    }
+  };
+
+  const startEditing = (id, currentText) => {
+    setEditingCommentId(id);
+    setEditingText(currentText);
+  };
+
+  const cancelEditing = () => {
+    setEditingCommentId(null);
+    setEditingText("");
+  };
+
+  const saveEditing = async (id) => {
+    if (!editingText.trim()) return;
+
+    try {
+      const response = await axiosInstance.put(
+        `/comments/${id}`,
+        { comment: editingText.trim() },
+        {
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem("access-token")}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setComments((prev) =>
+          prev.map((comment) =>
+            comment.id === id
+              ? { ...comment, text: editingText.trim() }
+              : comment
+          )
+        );
+        setEditingCommentId(null);
+        setEditingText("");
+      }
+    } catch (error) {
+      console.error("Error updating comment:", error);
+    }
+  };
+
   return (
     <div className="bg-gradient-to-b min-h-screen w-full from-[#fad1e3] to-[#ff65aa]/10 flex flex-col items-center font-kaisei py-10">
       <h1
         className="text-4xl font-bold text-[#A55166] mb-10"
         style={{ fontFamily: "'Julius Sans One', sans-serif" }}
       >
-        {/* For Oily Skin */} Products
+        Products
       </h1>
 
       <div className="w-[90%] max-w-7xl grid grid-cols-3 gap-8">
@@ -85,17 +188,6 @@ const ProductPage = () => {
             >
               {product.description || "Description"}
             </div>
-            {["admin"].includes(sessionStorage.getItem("role")) && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  deletePost(product._id);
-                }}
-                className="absolute top-6  hover:border-none hover:outline-none left-6 text-gray-600 text-[12px] bg-red-500 hover:bg-red-600 hover:text-white transiion-all font-semibold "
-              >
-                Delete Post
-              </button>
-            )}
           </div>
         ))}
       </div>
@@ -111,7 +203,7 @@ const ProductPage = () => {
             <div className="bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[90vh] flex flex-col md:flex-row overflow-hidden relative">
               <button
                 onClick={closeModal}
-                className="absolute top-4 hover:border-none hover:outline-none right-4 text-gray-600 hover:text-gray-900 text-3xl font-bold z-10"
+                className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 text-3xl font-bold z-10"
                 aria-label="Close modal"
               >
                 &times;
@@ -124,17 +216,6 @@ const ProductPage = () => {
                   alt=""
                   className="rounded-xl object-contain max-h-[80vh] w-full"
                 />
-                {["admin"].includes(sessionStorage.getItem("role")) && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/create-post/${selectedProduct._id}`);
-                    }}
-                    className="absolute top-6  hover:border-none hover:outline-none left-6 text-gray-600 text-[12px] bg-yellow-500 hover:bg-yellow-600 hover:text-white transiion-all font-semibold "
-                  >
-                    Edit Post
-                  </button>
-                )}
               </div>
 
               {/* Comments Section */}
@@ -150,10 +231,10 @@ const ProductPage = () => {
                   {comments.length === 0 && (
                     <p className="text-gray-500 italic">No comments yet.</p>
                   )}
-                  {comments.map(({ id, author, text }) => (
+                  {comments.map(({ id, author, userId, text }) => (
                     <div
                       key={id}
-                      className={`p-2 rounded ${
+                      className={`p-2 rounded relative ${
                         author === "You"
                           ? "bg-[#ff65aa]/20 self-end"
                           : "bg-gray-100"
@@ -162,7 +243,53 @@ const ProductPage = () => {
                       <p className="text-sm font-semibold text-[#A55166]">
                         {author}
                       </p>
-                      <p className="text-gray-700">{text}</p>
+
+                      {editingCommentId === id ? (
+                        <>
+                          <textarea
+                            rows={2}
+                            value={editingText}
+                            onChange={(e) => setEditingText(e.target.value)}
+                            className="w-full border border-gray-300 rounded-md p-1 resize-none focus:outline-none focus:ring-2 focus:ring-[#A55166]"
+                          />
+                          <div className="mt-1 flex gap-2 justify-end">
+                            <button
+                              onClick={() => saveEditing(id)}
+                              className="bg-[#A55166] text-white px-3 py-1 rounded font-semibold hover:bg-[#914257] transition"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={cancelEditing}
+                              className="bg-gray-300 text-gray-700 px-3 py-1 rounded font-semibold hover:bg-gray-400 transition"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-gray-700">{text}</p>
+                          {userId === loggedInUserId && (
+                            <div className="absolute top-2 right-2 flex gap-2">
+                              <button
+                                onClick={() => startEditing(id, text)}
+                                className="text-sm text-[#A55166] hover:text-[#914257] font-semibold"
+                                aria-label="Edit comment"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => deleteComment(id)}
+                                className="text-sm text-red-500 hover:text-red-700 font-semibold"
+                                aria-label="Delete comment"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </>
+                      )}
                     </div>
                   ))}
                 </div>

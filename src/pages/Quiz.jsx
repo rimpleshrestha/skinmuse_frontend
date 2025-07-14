@@ -47,11 +47,78 @@ const Quiz = () => {
     },
   ];
 
+  const skinTypeDescriptions = {
+    Dry: "Your skin tends to feel tight, flaky, or rough. It needs deep hydration and gentle care.",
+    Oily: "Your skin often looks shiny or greasy. Focus on lightweight, oil-controlling products.",
+    Combination:
+      "You have both oily and dry areas. Balanced care works best for you.",
+    Normal: "Your skin feels balanced and even. Gentle maintenance is key!",
+    Sensitive:
+      "Your skin reacts easily to products or the environment. Use calming, hypoallergenic products.",
+  };
+
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState("");
+  const [answers, setAnswers] = useState([]);
+  const [skinType, setSkinType] = useState(null);
 
   const handleOptionClick = (option) => {
     setSelectedOption(option);
+  };
+
+  const calculateSkinType = (answers) => {
+    const score = {
+      Dry: 0,
+      Oily: 0,
+      Combination: 0,
+      Normal: 0,
+      Sensitive: 0,
+    };
+
+    answers.forEach((answer) => {
+      if (
+        answer.includes("Tight") ||
+        answer.includes("Rough") ||
+        answer === "Rarely" ||
+        answer === "Rough or flaky"
+      )
+        score.Dry++;
+
+      if (
+        answer.includes("greasy") ||
+        answer === "Often" ||
+        answer === "Almost always" ||
+        answer === "Oily and smooth"
+      )
+        score.Oily++;
+
+      if (
+        answer.includes("T-zone") ||
+        answer === "Sometimes" ||
+        answer === "Combination (varies by area)"
+      )
+        score.Combination++;
+
+      if (
+        answer.includes("balanced") ||
+        answer === "Tans gradually" ||
+        answer === "Not sensitive at all" ||
+        answer === "Soft and even" ||
+        answer === "Rarely burns or tans"
+      )
+        score.Normal++;
+
+      if (
+        answer.includes("irritated") ||
+        answer.includes("sensitive") ||
+        answer === "Burns easily" ||
+        answer === "Red or irritated"
+      )
+        score.Sensitive++;
+    });
+
+    const sorted = Object.entries(score).sort((a, b) => b[1] - a[1]);
+    return sorted[0][0];
   };
 
   const handleNext = () => {
@@ -59,28 +126,50 @@ const Quiz = () => {
       alert("Please select an answer!");
       return;
     }
-    // Save answer logic can be added here
 
+    const updatedAnswers = [...answers, selectedOption];
+    setAnswers(updatedAnswers);
     setSelectedOption("");
+
+    if (currentQuestionIndex === questions.length - 1) {
+      const result = calculateSkinType(updatedAnswers);
+      setSkinType(result);
+    }
+
     setCurrentQuestionIndex((prev) => prev + 1);
   };
 
   const handleBack = () => {
     if (currentQuestionIndex === 0) return;
+
     setSelectedOption("");
+    setAnswers((prev) => prev.slice(0, -1));
     setCurrentQuestionIndex((prev) => prev - 1);
   };
 
-  if (currentQuestionIndex >= questions.length) {
+  if (skinType) {
+    const description = skinTypeDescriptions[skinType];
+
     return (
-      <div className="bg-gradient-to-b h-full from-[#fad1e3] to-[#ff65aa]/10 flex flex-col items-center justify-center font-kaisei min-h-screen">
+      <div className="bg-gradient-to-b from-[#fad1e3] to-[#ff65aa]/10 min-h-screen flex flex-col items-center justify-center font-kaisei px-4">
         <img
           src={SkinmuseLogo2}
           alt="Skinmuse Logo"
-          className="mb-16 w-72 h-auto"
+          className="mb-10 w-72 h-auto"
         />
-        <div className="w-[700px] p-8 rounded-2xl shadow-lg bg-opacity-25 backdrop-blur-md border bg-[#A55166] text-white font-inter text-center text-2xl font-bold">
-          Thank you for completing the quiz!
+        <div className="bg-white bg-opacity-20 backdrop-blur-lg border border-white/30 rounded-2xl shadow-xl p-10 w-full max-w-xl text-center font-inter">
+          <h2 className="text-3xl font-bold mb-4 text-[#d14b6e]">
+            💫 Your Skin Type is:{" "}
+            <span className="text-yellow-300">{skinType}</span>
+          </h2>
+          <p className="text-lg mb-8 text-[#d14b6e]">{description}</p>
+
+          <a
+            href="/products"
+            className="inline-block px-6 py-3 text-lg bg-[#A55166] text-white rounded-xl font-semibold hover:bg-[#914257] transition"
+          >
+            See Recommended Products
+          </a>
         </div>
       </div>
     );
@@ -90,7 +179,6 @@ const Quiz = () => {
 
   return (
     <div className="bg-gradient-to-b h-full from-[#fad1e3] to-[#ff65aa]/10 flex flex-col items-center justify-center font-kaisei min-h-screen">
-      {/* Moved logo further up by reducing bottom margin */}
       <img
         src={SkinmuseLogo2}
         alt="Skinmuse Logo"
