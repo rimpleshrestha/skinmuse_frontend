@@ -3,22 +3,53 @@ import toast from "react-hot-toast";
 import { axiosInstance } from "../../api/axiosinstance";
 
 const ProfilePage = () => {
-  const [name, setName] = useState("");
+  const [name, setName] = useState(
+    sessionStorage.getItem("name") !== "undefined"
+      ? sessionStorage.getItem("name")
+      : ""
+  );
 
-  const [profilePic, setProfilePic] = useState(null);
+  const [profilePic, setProfilePic] = useState(
+    sessionStorage.getItem("profilePic") !== "undefined"
+      ? sessionStorage.getItem("profilePic")
+      : null
+  );
   const [showModal, setShowModal] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleProfilePicChange = (e) => {
-    setProfilePic(URL.createObjectURL(e.target.files[0]));
+  const handleProfilePicChange = async (e) => {
+    const formData = new FormData();
+    formData.append("pfp", e.target.files[0]);
+    try {
+      const response = await axiosInstance.put(
+        "/update-profile-image",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log("response", response);
+      if (response.status === 200) {
+        toast.success("Profile image updated successfully!");
+      } else {
+        toast.error("Profile image update failed!");
+      }
+      sessionStorage.setItem("profilePic", response.data.user.avatar);
+      setProfilePic(URL.createObjectURL(e.target.files[0]));
+    } catch (error) {
+      console.error("Profile image update failed", error);
+      toast.error("Profile image update failed!");
+    }
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
     console.log({ name });
     const response = await axiosInstance.put("/update-details", { name });
-    console.log(response);
+    sessionStorage.setItem("name", name);
     if ([200, 201].includes(response.status)) {
       return toast.success("Profile updated successfully!");
     } else {
@@ -63,8 +94,13 @@ const ProfilePage = () => {
         className="w-[600px] p-8 rounded-2xl shadow-lg bg-opacity-25 backdrop-blur-md border bg-[#A55166]"
       >
         {/* Profile Picture */}
-        {/* <div className="mb-6 flex flex-col items-center">
-          <div className="w-32 h-32 rounded-full bg-white shadow-md mb-3 overflow-hidden">
+        <div className="mb-6 flex flex-col items-center">
+          <div
+            onClick={() => {
+              document.getElementById("profilePicInput").click();
+            }}
+            className="w-32 h-32 cursor-pointer rounded-full bg-white shadow-md mb-3 overflow-hidden"
+          >
             {profilePic ? (
               <img
                 src={profilePic}
@@ -80,10 +116,11 @@ const ProfilePage = () => {
           <input
             type="file"
             accept="image/*"
+            id="profilePicInput"
             onChange={handleProfilePicChange}
-            className="text-sm text-white font-inter"
+            className="text-sm text-white hidden font-inter"
           />
-        </div> */}
+        </div>
 
         {/* Name */}
         <div className="mb-4">

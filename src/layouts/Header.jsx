@@ -16,6 +16,10 @@ const Header = () => {
     sessionStorage.removeItem("access-token");
     sessionStorage.removeItem("email");
     sessionStorage.removeItem("role");
+    sessionStorage.removeItem("name");
+    sessionStorage.removeItem("role");
+    sessionStorage.removeItem("profilePic");
+
     setToken(null);
     navigate("/signup");
   };
@@ -42,6 +46,12 @@ const Header = () => {
         )}
         {token ? (
           <>
+            <button
+              className="text-nowrap"
+              onClick={() => navigate("/saved-products")}
+            >
+              Saved Products
+            </button>
             <button
               className="text-nowrap"
               onClick={() => navigate("/products")}

@@ -10,6 +10,7 @@ import ProfilePage from "../pages/Profilepage";
 import ProductPage from "../pages/Productpage"; // <-- Import ProductPage here
 import { Toaster } from "react-hot-toast";
 import MainLayout from "../layouts/MainLayout";
+import ProductList from "../pages/ProductList";
 
 const AppRouter = () => {
   const navigate = useNavigate();
@@ -36,6 +37,7 @@ const AppRouter = () => {
           <Route path="/create-post/" element={<CreatePostPage />} />
           <Route path="/create-post/:id" element={<CreatePostPage />} />
           <Route path="/products" element={<ProductPage />} />{" "}
+          <Route path="/saved-products" element={<ProductList />} />{" "}
           {/* <-- Added here */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/register" element={<RegisterPage />} />

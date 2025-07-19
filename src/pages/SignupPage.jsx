@@ -26,6 +26,8 @@ const LoginPage = () => {
         sessionStorage.setItem("access-token", response.data.accessToken);
         sessionStorage.setItem("email", response.data.email);
         sessionStorage.setItem("role", response.data.userRole);
+        sessionStorage.setItem("name", response.data.name);
+        sessionStorage.setItem("profilePic", response.data.avatar);
         navigate("/dashboard");
       } else {
         toast.error("Login Failed!");

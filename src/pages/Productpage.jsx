@@ -1,6 +1,11 @@
+// ...imports
 import { useEffect, useState } from "react";
 import { axiosInstance } from "../../api/axiosinstance";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { FaListUl } from "react-icons/fa"; // added for the list icon
+import { jwtDecode } from "jwt-decode";
+import { BiHeart } from "react-icons/bi";
+import toast from "react-hot-toast";
 
 const ProductPage = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -11,17 +16,22 @@ const ProductPage = () => {
   const [productData, setProductData] = useState([]);
   const navigate = useNavigate();
 
-  // Assuming logged-in user id is stored in sessionStorage
-  const loggedInUserId = sessionStorage.getItem("userId");
-
+  const token = jwtDecode(sessionStorage.getItem("access-token"));
+  const loggedInUserId = token?.id || sessionStorage.getItem("userId");
+  const [searchParams, setSearchParams] = useSearchParams();
   useEffect(() => {
     (async () => {
-      const response = await axiosInstance.get("/post");
+      const skinType = searchParams.get("skinType");
+      let url = `/post/`;
+      if (skinType && skinType !== "all") {
+        url += `?type=${encodeURIComponent(skinType)}`;
+      }
+      const response = await axiosInstance.get(url);
       if ([200, 201].includes(response.status)) {
         setProductData(response?.data?.posts);
       }
     })();
-  }, []);
+  }, [searchParams.get("skinType")]);
 
   const openModal = async (product) => {
     setSelectedProduct(product);
@@ -38,18 +48,20 @@ const ProductPage = () => {
           },
         }
       );
+
       if (response.status === 200) {
-        console.log("Comments from backend:", response.data);
         setComments(
-          response.data.map((c) => ({
-            id: c._id,
-            author:
-              c.user?._id === loggedInUserId
-                ? "You"
-                : c.user?.name || "Unknown",
-            userId: c.user?._id, // store userId for permission checks
-            text: c.comment,
-          }))
+          response.data.map((c) => {
+            const userIdStr = c.user?._id?.toString();
+            const isOwner = userIdStr === loggedInUserId;
+
+            return {
+              id: c._id,
+              author: isOwner ? "You" : c.user?.name || "Unknown",
+              userId: userIdStr,
+              text: c.comment,
+            };
+          })
         );
       }
     } catch (error) {
@@ -85,7 +97,7 @@ const ProductPage = () => {
           ...prev,
           {
             id: savedComment._id,
-            author: "You", // The new comment belongs to logged-in user
+            author: "You",
             userId: loggedInUserId,
             text: savedComment.comment,
           },
@@ -152,45 +164,100 @@ const ProductPage = () => {
       console.error("Error updating comment:", error);
     }
   };
-
+  const handleSaveProduct = async (isSaved, id = selectedProduct?._id) => {
+    try {
+      let response;
+      if (isSaved) {
+        // Unsave the product
+        response = await axiosInstance.delete(`/post/unsave/${id}`);
+        if (response.status === 200) {
+          setSelectedProduct((prev) =>
+            prev && prev._id === id ? { ...prev, isSaved: false } : prev
+          );
+          setProductData((prev) =>
+            prev.map((p) => (p._id === id ? { ...p, isSaved: false } : p))
+          );
+          toast.success("Product unsaved successfully!");
+        }
+      } else {
+        // Save the product
+        response = await axiosInstance.post(`/post/save/${id}`);
+        if (response.status === 200) {
+          setSelectedProduct((prev) =>
+            prev && prev._id === id ? { ...prev, isSaved: true } : prev
+          );
+          setProductData((prev) =>
+            prev.map((p) => (p._id === id ? { ...p, isSaved: true } : p))
+          );
+          toast.success("Product saved successfully!");
+        }
+      }
+    } catch (error) {
+      console.error("Error saving/unsaving product:", error);
+    }
+  };
   return (
     <div className="bg-gradient-to-b min-h-screen w-full from-[#fad1e3] to-[#ff65aa]/10 flex flex-col items-center font-kaisei py-10">
       <h1
         className="text-4xl font-bold text-[#A55166] mb-10"
         style={{ fontFamily: "'Julius Sans One', sans-serif" }}
       >
-        Products
+        Products for{" "}
+        <select
+          className="ml-2 border-none outline-none bg-transparent w-fit text-[#A55166] font-bold rounded-lg p-2"
+          onChange={(e) => {
+            const skinType = e.target.value;
+            // Handle skin type change logic here
+            searchParams.set("skinType", skinType);
+            setSearchParams(searchParams);
+          }}
+        >
+          <option value="all">All</option>
+          <option value="oily">Oily</option>
+          <option value="dry">Dry</option>
+          <option value="combination">Combination</option>
+          <option value="combination">normal</option>
+        </select>
       </h1>
 
-      <div className="w-[90%] max-w-7xl grid grid-cols-3 gap-8">
-        {productData.map((product, idx) => (
-          <div
-            key={idx}
-            onClick={() => openModal(product)}
-            className="bg-white rounded-2xl relative shadow-lg p-4 flex flex-col cursor-pointer hover:shadow-xl transition"
-          >
-            <img
-              src={product.image}
-              alt=""
-              className="rounded-xl object-cover w-full h-44 mb-4"
-            />
+      {productData.length > 0 ? (
+        <div className="w-[90%] max-w-7xl grid grid-cols-3 gap-8">
+          {productData.map((product, idx) => (
             <div
-              className={`min-h-[2rem] mb-2 text-center font-inter font-semibold text-lg ${
-                product.title ? "text-[#A55166]" : "text-gray-400"
-              }`}
+              key={idx}
+              onClick={() => openModal(product)}
+              className="bg-white rounded-2xl relative shadow-lg p-4 flex flex-col cursor-pointer hover:shadow-xl transition"
             >
-              {product.title || "Title"}
+              <img
+                src={product.image}
+                alt=""
+                className="rounded-xl object-cover w-full h-44 mb-4"
+              />
+              <div
+                className={`min-h-[2rem] mb-2 text-center font-inter font-semibold text-lg ${
+                  product.title ? "text-[#A55166]" : "text-gray-400"
+                }`}
+              >
+                {product.title || "Title"}
+              </div>
+              <div
+                className={`min-h-[3rem] line-clamp-3 text-center font-inter text-sm ${
+                  product.description ? "text-[#A55166]/80" : "text-gray-400"
+                }`}
+              >
+                {product.description || "Description"}
+              </div>
             </div>
-            <div
-              className={`min-h-[3rem] line-clamp-3 text-center font-inter text-sm ${
-                product.description ? "text-[#A55166]/80" : "text-gray-400"
-              }`}
-            >
-              {product.description || "Description"}
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="w-full flex flex-col items-center justify-center py-20">
+          <p className="text-2xl text-gray-400 font-semibold mb-2">
+            No products found.
+          </p>
+          <span className="text-5xl">🛒</span>
+        </div>
+      )}
 
       {/* Modal */}
       {selectedProduct && (
@@ -200,7 +267,7 @@ const ProductPage = () => {
             onClick={closeModal}
           />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-6 overflow-auto">
-            <div className="bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[90vh] flex flex-col md:flex-row overflow-hidden relative">
+            <div className="bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[90vh] overflow-auto flex flex-col md:flex-row  relative">
               <button
                 onClick={closeModal}
                 className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 text-3xl font-bold z-10"
@@ -209,23 +276,51 @@ const ProductPage = () => {
                 &times;
               </button>
 
-              {/* Image Section */}
-              <div className="md:w-1/2 w-full relative flex items-center justify-center bg-[#fad1e3] p-4">
+              {/* Image Section (List icon removed from here) */}
+              <div className="md:w-1/2 w-full flex items-center justify-center bg-[#fad1e3] p-4">
                 <img
                   src={selectedProduct.image}
                   alt=""
                   className="rounded-xl object-contain max-h-[80vh] w-full"
                 />
+                {selectedProduct.isSaved ? (
+                  <span
+                    onClick={() => {
+                      handleSaveProduct(true);
+                    }}
+                    className="p-4 rounded-full bg-red-500 absolute top-10 left-10"
+                  >
+                    <BiHeart size={30} fill="white" />
+                  </span>
+                ) : (
+                  <span
+                    onClick={() => {
+                      handleSaveProduct(false);
+                    }}
+                    className="p-4 rounded-full bg-white absolute top-10 left-10"
+                  >
+                    <BiHeart size={30} fill="red" />
+                  </span>
+                )}
               </div>
 
-              {/* Comments Section */}
+              {/* Comments Section with List Icon */}
               <div className="md:w-1/2 w-full flex flex-col p-6">
-                <h2
-                  className="text-2xl font-semibold text-[#A55166] mb-4"
-                  style={{ fontFamily: "'Julius Sans One', sans-serif" }}
-                >
-                  Comments
-                </h2>
+                <div className="flex justify-between items-center mb-4">
+                  <h2
+                    className="text-2xl font-semibold text-[#A55166]"
+                    style={{ fontFamily: "'Julius Sans One', sans-serif" }}
+                  >
+                    Comments
+                  </h2>
+                  <button
+                    onClick={() => navigate("/product-list")}
+                    className="text-[#A55166] hover:text-[#914257]"
+                    title="View My Product List"
+                  >
+                    <FaListUl className="text-2xl" />
+                  </button>
+                </div>
 
                 <div className="flex-1 overflow-y-auto mb-4 space-y-3 border border-gray-300 rounded-md p-4">
                   {comments.length === 0 && (
@@ -269,20 +364,18 @@ const ProductPage = () => {
                         </>
                       ) : (
                         <>
-                          <p className="text-gray-700">{text}</p>
+                          <p className="text-gray-700 break-words">{text}</p>
                           {userId === loggedInUserId && (
                             <div className="absolute top-2 right-2 flex gap-2">
                               <button
                                 onClick={() => startEditing(id, text)}
                                 className="text-sm text-[#A55166] hover:text-[#914257] font-semibold"
-                                aria-label="Edit comment"
                               >
                                 Edit
                               </button>
                               <button
                                 onClick={() => deleteComment(id)}
                                 className="text-sm text-red-500 hover:text-red-700 font-semibold"
-                                aria-label="Delete comment"
                               >
                                 Delete
                               </button>
