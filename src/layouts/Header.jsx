@@ -1,4 +1,4 @@
-import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import SkinmuseLogo from "../assets/images/skinMuseLogo.png";
 import { useEffect, useState } from "react";
 
@@ -17,12 +17,12 @@ const Header = () => {
     sessionStorage.removeItem("email");
     sessionStorage.removeItem("role");
     sessionStorage.removeItem("name");
-    sessionStorage.removeItem("role");
     sessionStorage.removeItem("profilePic");
 
     setToken(null);
     navigate("/signup");
   };
+
   return (
     <header className="bg-white shadow flex justify-between items-center px-12">
       <NavLink to="/">
@@ -33,35 +33,26 @@ const Header = () => {
         />
       </NavLink>
       <nav className="flex gap-3 font-inter items-center font-bold text-[#A55166]">
-        <button className="text-nowrap" to="#">
+        {/* About Us button navigates to /about */}
+        <button className="text-nowrap" onClick={() => navigate("/about")}>
           About Us
         </button>
+
         {["admin"].includes(sessionStorage.getItem("role")) && (
-          <button
-            className="text-nowrap"
-            onClick={() => navigate("/create-post")}
-          >
+          <button className="text-nowrap" onClick={() => navigate("/create-post")}>
             Create Post
           </button>
         )}
+
         {token ? (
           <>
-            <button
-              className="text-nowrap"
-              onClick={() => navigate("/saved-products")}
-            >
+            <button className="text-nowrap" onClick={() => navigate("/saved-products")}>
               Saved Products
             </button>
-            <button
-              className="text-nowrap"
-              onClick={() => navigate("/products")}
-            >
+            <button className="text-nowrap" onClick={() => navigate("/products")}>
               Products
             </button>
-            <button
-              className="text-nowrap"
-              onClick={() => navigate("/profile")}
-            >
+            <button className="text-nowrap" onClick={() => navigate("/profile")}>
               Profile
             </button>
             <button className="text-nowrap" onClick={logout}>
