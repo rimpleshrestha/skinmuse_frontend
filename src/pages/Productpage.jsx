@@ -196,6 +196,25 @@ const ProductPage = () => {
       console.error("Error saving/unsaving product:", error);
     }
   };
+  const handleDeleteProduct = async (id) => {
+    try {
+      if (sessionStorage.getItem("role") !== "admin") {
+        toast.error("You do not have permission to delete this product.");
+        return;
+      }
+      const response = await axiosInstance.delete(`/post/${id}`);
+      if (response.status === 200) {
+        setProductData((prev) => prev.filter((p) => p._id !== id));
+        if (selectedProduct?._id === id) {
+          closeModal();
+        }
+        toast.success("Product deleted successfully!");
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      toast.error("Failed to delete product.");
+    }
+  };
   return (
     <div className="bg-gradient-to-b min-h-screen w-full from-[#fad1e3] to-[#ff65aa]/10 flex flex-col items-center font-kaisei py-10">
       <h1
@@ -221,7 +240,7 @@ const ProductPage = () => {
       </h1>
 
       {productData.length > 0 ? (
-        <div className="w-[90%] max-w-7xl grid grid-cols-3 gap-8">
+        <div className="w-[90%] max-w-7xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {productData.map((product, idx) => (
             <div
               key={idx}
@@ -277,7 +296,7 @@ const ProductPage = () => {
               </button>
 
               {/* Image Section (List icon removed from here) */}
-              <div className="md:w-1/2 w-full flex items-center justify-center bg-[#fad1e3] p-4">
+              <div className="md:w-1/2 relative w-full flex items-center justify-center bg-[#fad1e3] p-4">
                 <img
                   src={selectedProduct.image}
                   alt=""
@@ -302,10 +321,42 @@ const ProductPage = () => {
                     <BiHeart size={30} fill="red" />
                   </span>
                 )}
+                {sessionStorage.getItem("role") === "admin" && (
+                  <div className="absolute bottom-10 left-10 flex gap-2">
+                    <button
+                      onClick={() =>
+                        navigate(`/create-post/${selectedProduct._id}`)
+                      }
+                      className="text-sm text-[#A55166] hover:text-[#914257] font-semibold"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteProduct(selectedProduct._id)}
+                      className="text-sm text-red-500 hover:text-red-700 font-semibold"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Comments Section with List Icon */}
+
               <div className="md:w-1/2 w-full flex flex-col p-6">
+                {selectedProduct?.description && (
+                  <>
+                    {" "}
+                    <h2
+                      className="text-2xl font-semibold text-[#A55166]"
+                      style={{ fontFamily: "'Julius Sans One', sans-serif" }}
+                    >
+                      Description
+                    </h2>
+                    <p>{selectedProduct?.description}</p>
+                  </>
+                )}
+
                 <div className="flex justify-between items-center mb-4">
                   <h2
                     className="text-2xl font-semibold text-[#A55166]"
@@ -321,7 +372,6 @@ const ProductPage = () => {
                     <FaListUl className="text-2xl" />
                   </button>
                 </div>
-
                 <div className="flex-1 overflow-y-auto mb-4 space-y-3 border border-gray-300 rounded-md p-4">
                   {comments.length === 0 && (
                     <p className="text-gray-500 italic">No comments yet.</p>
@@ -386,7 +436,6 @@ const ProductPage = () => {
                     </div>
                   ))}
                 </div>
-
                 <div className="flex items-center gap-2">
                   <textarea
                     rows={2}

@@ -10,7 +10,7 @@ export default function Homepage() {
 
   return (
     <div className=" bg-[#FFEDF5] h-full w-full flex justify-center items-center px-10 font-kaisei overflow-x-hidden overflow-clip">
-      <main className="flex justify-between gap-[30px] h-full w-full items-center  ">
+      <main className="flex justify-between max-md:flex-wrap max-md:mt-32 gap-[30px] h-full w-full items-center  ">
         {/* Left side with star and text */}
         <div className="flex flex-col items-start text-left max-w-xl relative">
           <img

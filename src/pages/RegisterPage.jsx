@@ -40,7 +40,7 @@ const RegisterPage = () => {
 
       <form
         onSubmit={onSubmit}
-        className="w-[600px] p-8 rounded-2xl shadow-lg bg-opacity-25 backdrop-blur-md border bg-[#A55166]"
+        className="min-w-[600px] max-md:min-w-[80%] p-8 rounded-2xl shadow-lg bg-opacity-25 backdrop-blur-md border bg-[#A55166]"
       >
         <div className="mb-4">
           <label className="block mb-1 text-[#A55166] font-bold font-inter">
