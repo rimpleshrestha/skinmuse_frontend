@@ -32,7 +32,7 @@ const Header = () => {
       className="bg-white fixed w-full top-0 z-50
      shadow flex justify-between items-center px-12"
     >
-      <NavLink to="/">
+      <NavLink to={token ? "/dashboard" : "/"}>
         <img
           src={SkinmuseLogo}
           alt="SkinMuse Logo"
